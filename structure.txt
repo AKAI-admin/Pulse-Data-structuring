@@ -1,31 +1,3 @@
-Folder PATH listing for volume New Volume
-Volume serial number is 0A27-A19B
-D:.
-|   Aju Ahmed PSMA.docx
-|   APPENDIX -(D-FORM) (1) dhodi (1).docx
-|   APPENDIX -(D-FORM) (1) dhodi.docx
-|   Bill Letter Format.docx
-|   Certificate 1.pdf
-|   Certificate 3.pdf
-|   DAILY CASH 2024.xlsx
-|   Dr Roshni Digi Sign.jpg
-|   Dr Roshni Digi Sign.pdf
-|   DR VISHNU SIGNATURE.docx
-|   Dr. Roshni Sign.docx
-|   EUS PULSE BORIVALI PET 2021.pdf
-|   form.pdf
-|   HISTORY PAPER.pdf
-|   Normal.docx
-|   NUCLEAR FORM.pdf
-|   Pet Ct - Pat Details.xlsx
-|   Pre Scan Data_Final (4).pdf
-|   radiation symbol.docx
-|   reports pet ct - Shortcut.lnk
-|   structure.txt
-|   swati.docx
-|   Umesh Damania.docx
-|   ~$CT  CHEST covid dr alok.doc
-|   
 +---2021
 |   +---April 2021
 |   |   +---01 April 2021

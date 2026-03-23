@@ -5,10 +5,10 @@ const patientSchema = new mongoose.Schema(
     name: { type: String, required: true },
     gender: {
       type: String,
-      required: true,
+      required: false,
       enum: ["male", "female", "other"],
     },
-    dob: { type: Date, required: true },
+    yob: { type: String, required: false },
   },
   { timestamps: true },
 );
