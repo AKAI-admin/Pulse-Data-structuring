@@ -194,10 +194,32 @@ function saveProgress(processed) {
   fs.writeFileSync(PROGRESS_FILE, JSON.stringify([...processed], null, 2));
 }
 
+// ─── MongoDB Connection (SRV fallback) ───────────────────────────────────────
+
+const MONGO_STANDARD_URI =
+  "mongodb://pulselabs13_db_user:tDZwThFhIber30yY@" +
+  "ac-mmcizf1-shard-00-00.hcdmbzo.mongodb.net:27017," +
+  "ac-mmcizf1-shard-00-01.hcdmbzo.mongodb.net:27017," +
+  "ac-mmcizf1-shard-00-02.hcdmbzo.mongodb.net:27017/pulse" +
+  "?ssl=true&replicaSet=atlas-z2o3xu-shard-0&authSource=admin&appName=Cluster0";
+
+async function connectMongo() {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+  } catch (err) {
+    if (err.code === "ECONNREFUSED" || err.message.includes("querySrv")) {
+      console.warn("SRV lookup failed — retrying with standard connection string …");
+      await mongoose.connect(MONGO_STANDARD_URI);
+    } else {
+      throw err;
+    }
+  }
+}
+
 // ─── Main ────────────────────────────────────────────────────────────────────
 
 async function main() {
-  await mongoose.connect(process.env.MONGO_URI);
+  await connectMongo();
   console.log("MongoDB connected!");
 
   const existingPatients = await Patient.find({}, { name: 1 }).lean();
