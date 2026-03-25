@@ -1,0 +1,16 @@
+{
+  "mode": "DRY-RUN",
+  "elapsed_seconds": 0.0,
+  "total_files_found": 0,
+  "valid_files": 0,
+  "skipped_files": 0,
+  "skip_reasons": {},
+  "unique_patients_from_manifest": 0,
+  "unique_content_hashes": 0,
+  "s3_key_collisions": 0,
+  "s3_files_uploaded": 0,
+  "patients_created": 0,
+  "scans_created": 0,
+  "duplicate_content_scans": 0,
+  "dry_run": true
+}
