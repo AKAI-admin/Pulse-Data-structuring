@@ -3,8 +3,9 @@
 Main orchestrator for the rebuild pipeline.
 
 Usage:
-    python run_ingestion.py --dry-run     # scan files, build manifest, preview stats
-    python run_ingestion.py --apply       # full run: scan, upload S3, write Mongo
+    python run_ingestion.py --dry-run              # scan manifest, preview stats
+    python run_ingestion.py --apply                # full: S3 upload + Mongo
+    python run_ingestion.py --apply --skip-scan --mongo-only   # Mongo only (S3 already done)
 
 The pipeline runs in stages:
   1. Scan source filesystem and build manifest (with file hashing)
@@ -18,9 +19,9 @@ import json
 import time
 from pathlib import Path
 
-from config import ARTIFACTS_DIR, MANIFEST_PATH, REPORT_PATH
+from config import ARTIFACTS_DIR, MANIFEST_PATH, REPORT_PATH, S3_BUCKET
 from scan_source import load_manifest, scan_and_build_manifest
-from upload_s3 import upload_files
+from upload_s3 import build_report_url_map, upload_files
 from write_mongo import write_patients_and_scans
 
 
@@ -34,10 +35,25 @@ def main():
         action="store_true",
         help="Skip filesystem scan; reuse existing manifest",
     )
+    parser.add_argument(
+        "--mongo-only",
+        action="store_true",
+        help="With --apply: skip S3 upload; only write Mongo (use after files are already in S3). Implies building report URLs from manifest.",
+    )
     args = parser.parse_args()
 
+    if args.mongo_only and not args.apply:
+        parser.error("--mongo-only requires --apply")
+
     dry_run = args.dry_run
-    label = "DRY-RUN" if dry_run else "APPLY"
+    mongo_only = args.mongo_only
+
+    if mongo_only:
+        label = "APPLY — MONGO ONLY"
+    elif dry_run:
+        label = "DRY-RUN"
+    else:
+        label = "APPLY"
     print(f"{'=' * 60}")
     print(f"  Rebuild Pipeline — {label}")
     print(f"{'=' * 60}\n")
@@ -57,10 +73,16 @@ def main():
     t1 = time.time()
     print(f"\n[Phase 1 done in {t1 - t0:.1f}s]\n")
 
-    # ── Phase 2: S3 Upload ───────────────────────────────────────────────────
-    url_map = upload_files(valid, dry_run=dry_run)
-    t2 = time.time()
-    print(f"\n[Phase 2 done in {t2 - t1:.1f}s]\n")
+    # ── Phase 2: S3 Upload (optional) ──────────────────────────────────────────
+    if mongo_only:
+        print("[Phase 2 skipped — mongo-only: building report URLs from manifest]\n")
+        url_map = build_report_url_map(valid)
+        print(f"Built {len(url_map)} report URLs for bucket s3://{S3_BUCKET}/\n")
+        t2 = time.time()
+    else:
+        url_map = upload_files(valid, dry_run=dry_run)
+        t2 = time.time()
+        print(f"\n[Phase 2 done in {t2 - t1:.1f}s]\n")
 
     # ── Phase 3: MongoDB Write ───────────────────────────────────────────────
     mongo_stats = write_patients_and_scans(entries, url_map, dry_run=dry_run)
@@ -79,6 +101,7 @@ def main():
 
     report = {
         "mode": label,
+        "mongo_only": mongo_only,
         "elapsed_seconds": round(elapsed, 1),
         "total_files_found": len(entries),
         "valid_files": len(valid),

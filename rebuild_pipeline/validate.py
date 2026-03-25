@@ -8,31 +8,14 @@ import json
 import sys
 from collections import Counter
 
-from pymongo import MongoClient
-
 from config import (
     MANIFEST_PATH,
     MONGO_DB_NAME,
-    MONGO_STANDARD_URI,
-    MONGO_URI,
     PATIENTS_COLLECTION,
     SCANS_COLLECTION,
 )
+from mongo_client import connect_mongo
 from scan_source import load_manifest
-
-
-def connect_mongo() -> MongoClient:
-    uri = MONGO_URI.strip() if MONGO_URI else ""
-    if uri:
-        try:
-            client = MongoClient(uri, serverSelectionTimeoutMS=10000)
-            client.admin.command("ping")
-            return client
-        except Exception:
-            pass
-    client = MongoClient(MONGO_STANDARD_URI, serverSelectionTimeoutMS=10000)
-    client.admin.command("ping")
-    return client
 
 
 def main():

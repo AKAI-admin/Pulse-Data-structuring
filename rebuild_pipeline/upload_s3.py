@@ -90,3 +90,15 @@ def upload_files(entries, *, dry_run: bool = False) -> dict[str, str]:
     print()
     print(f"Uploaded: {len(uploaded)}, Errors: {errors}")
     return uploaded
+
+
+def build_report_url_map(entries) -> dict[str, str]:
+    """
+    Build s3_key -> public HTTPS URL without uploading.
+    Use after objects already exist in S3 (--mongo-only).
+    """
+    to_map = [e for e in entries if not e.skip_reason]
+    result: dict[str, str] = {}
+    for e in to_map:
+        result[e.s3_key] = _build_report_url(S3_BUCKET, AWS_REGION, e.s3_key)
+    return result

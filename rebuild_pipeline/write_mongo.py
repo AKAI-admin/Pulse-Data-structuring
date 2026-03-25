@@ -4,33 +4,13 @@ Phase 3: Write patients and scans to new MongoDB collections in batches.
 
 from datetime import datetime, timezone
 
-from pymongo import MongoClient, UpdateOne
-from pymongo.errors import ConnectionFailure
-
 from config import (
     MONGO_BATCH_SIZE,
     MONGO_DB_NAME,
-    MONGO_STANDARD_URI,
-    MONGO_URI,
     PATIENTS_COLLECTION,
     SCANS_COLLECTION,
 )
-from normalize import normalize_name_key
-
-
-def connect_mongo() -> MongoClient:
-    uri = MONGO_URI.strip() if MONGO_URI else ""
-    if uri:
-        try:
-            client = MongoClient(uri, serverSelectionTimeoutMS=10000)
-            client.admin.command("ping")
-            return client
-        except ConnectionFailure:
-            print("SRV lookup failed — retrying with standard connection string …")
-
-    client = MongoClient(MONGO_STANDARD_URI, serverSelectionTimeoutMS=10000)
-    client.admin.command("ping")
-    return client
+from mongo_client import connect_mongo
 
 
 def write_patients_and_scans(

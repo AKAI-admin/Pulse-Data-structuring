@@ -7,13 +7,14 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
+_env_path = Path(__file__).resolve().parent.parent / ".env"
+load_dotenv(_env_path)
 
 # ── Source filesystem ────────────────────────────────────────────────────────
 ROOT_DIR = Path(os.environ.get("ROOT_DIR", r"D:\report\PET-CT Reports"))
 
 # ── AWS / S3 ─────────────────────────────────────────────────────────────────
-S3_BUCKET = os.environ.get("S3_BUCKET_NAME_V2", "")
+S3_BUCKET = os.environ.get("S3_BUCKET_NAME_V2", "") or os.environ.get("S3_BUCKET_NAME", "")
 AWS_REGION = os.environ.get("AWS_REGION", "ap-south-1")
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID", "")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY", "")
