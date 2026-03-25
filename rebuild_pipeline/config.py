@@ -7,15 +7,27 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-_env_path = Path(__file__).resolve().parent.parent / ".env"
-load_dotenv(_env_path)
+_pkg_dir = Path(__file__).resolve().parent
+_repo_root = _pkg_dir.parent
+# Load .env from repo root first, then optional rebuild_pipeline/.env (override)
+for _env_candidate in (_repo_root / ".env", _pkg_dir / ".env"):
+    if _env_candidate.is_file():
+        load_dotenv(_env_candidate, override=True)
+
+
+def _env_str(key: str) -> str:
+    v = os.environ.get(key, "") or ""
+    v = v.strip()
+    if len(v) >= 2 and v[0] in "\"'" and v[0] == v[-1]:
+        v = v[1:-1]
+    return v.strip()
 
 # ── Source filesystem ────────────────────────────────────────────────────────
 ROOT_DIR = Path(os.environ.get("ROOT_DIR", r"D:\report\PET-CT Reports"))
 
 # ── AWS / S3 ─────────────────────────────────────────────────────────────────
-S3_BUCKET = os.environ.get("S3_BUCKET_NAME_V2", "") or os.environ.get("S3_BUCKET_NAME", "")
-AWS_REGION = os.environ.get("AWS_REGION", "ap-south-1")
+S3_BUCKET = _env_str("S3_BUCKET_NAME_V2") or _env_str("S3_BUCKET_NAME") or _env_str("AWS_S3_BUCKET")
+AWS_REGION = _env_str("AWS_REGION") or "ap-south-1"
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID", "")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY", "")
 
